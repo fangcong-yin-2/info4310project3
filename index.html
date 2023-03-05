@@ -280,6 +280,76 @@
     </div>
 
 
+    <div class="right">
+
+      <div id="table_title">
+        <p id="table_title_content"></p>
+      </div>
+  
+      <table id="table">
+        <th id="thead"></th>
+        <tr>
+          <td id="rating">
+            <p id="this_rating">Pay</p>
+          </td>
+        </tr>
+        <tr>
+          <td id="review_count">
+            <p id="this_review_count"></p>
+          </td>
+        </tr>
+        <tr>
+          <td id="neighborhood">
+            <p id="this_neighborhood"></p>
+          </td>
+        </tr>
+        <tr>
+          <td id="category">
+            <p id="this_category"></p>
+          </td>
+        </tr>
+      </table>
+  
+      <script>
+        const clicked_map = async function (event, d) {
+          let this_item = event.target.__data__.id;
+          let this_abbr = getKeyByValue(state_codes, this_state_code);
+          let this_state = getKeyByValue(us_state_to_abbrev, this_abbr);
+          let table = d3.select('#table');
+          let data = await d3.csv("yelp_pittsburgh.csv", d3.autoType);
+          data = data.filter(d => d.name === selected_name);
+          // console.log(data);
+  
+          let table_data;
+          let title;
+          let rating = 0;
+          let review_count = 0;
+          let neighborhood = "";
+          let category = "";
+
+  
+          let text_title = d3.select("#table_title");
+          text_title.select("#table_title_content").text(title);
+  
+          let text_rating = d3.select("#rating");
+          text_rating.select("#this_rating").text("Rating:     " + rating);
+  
+          let text_review_count = d3.select("#review_count");
+          text_review_count.select("#this_review_count").text("Number of Reviews:     " + review_count);
+  
+          let text_neighborhood = d3.select("#neighborhood");
+          text_neighborhood.select("#this_neighborhood").text("Average Output:     " + neighborhood);
+  
+          let text_category = d3.select("#category");
+          text_category.select("#this_category").text("Total category:     " + category);
+  
+        }
+        // requestData_table("");
+      </script>
+  
+    </div>
+
+
 </body>
 
 </html>
