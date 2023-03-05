@@ -133,13 +133,13 @@ function draw(words) {
                 { d.Position = projection( [d.longitude, d.latitude] );
             });
 
-            map.selectAll(".activities").data(data)
-                .join("circle")
-                .attr("r", 2)
-                .attr("fill", 'red')
-                .attr("opacity", 0.4)
-                .attr("cx", d => d.Position[0])
-                .attr("cy", d => d.Position[1]);
+            // map.selectAll(".activities").data(data)
+            //     .join("circle")
+            //     .attr("r", 2)
+            //     .attr("fill", 'red')
+            //     .attr("opacity", 0.4)
+            //     .attr("cx", d => d.Position[0])
+            //     .attr("cy", d => d.Position[1]);
             
             // map.append("path")
             //     .datum(statesMesh)
@@ -148,6 +148,53 @@ function draw(words) {
             //     .style('stroke','grey')
             //     .style('stroke-width',"1px")
             //     .style('fill','none')
+
+
+            // pan and zoom
+            var zoom = d3.zoom()
+                      .scaleExtent([1,20])
+                      .translateExtent([[-50,-50],[mapWidth+50,mapHeight+50]])  // to lock to edges
+                      .on("zoom", mapZoomed);
+    
+            svg.call(zoom);
+        
+            svg.call(zoom.transform, d3.zoomIdentity); // Executes zoomed() once because we technically have changed the transform
+            
+        
+            function mapZoomed({transform}) {       // Destructuring here directly pulls and assigns the transform
+              map.attr("transform", transform.toString() );
+        
+              map.select(".activities")
+                          .style("stroke-width", 2 / transform.k);
+              // viewport.select(".county-outline")
+              //             .style("stroke-width", 1 / transform.k);
+              
+
+                data.forEach( d => {
+                  d.Position = projection( [d.longitude, d.latitude] );
+                });
+
+                data.filter(l => l.Position != null)
+                // console.log(longlat)
+
+                map.selectAll(".activities").data(data)
+                .join("circle")
+                .attr("r", 3)
+
+                .attr("fill", "red")
+                .style('opacity',0.5)
+
+                .attr("cx", d => d.Position[0])
+
+                .attr("cy", d => d.Position[1]);
+
+                // map.selectAll("circle").remove();
+
+
+
+
+        }
+
 
 
 
