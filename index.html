@@ -10,6 +10,7 @@
 
 </head>
 <body>
+  <div class = "word_cloud">
     <svg id="cloud" height="400" width="500"></svg>
     <script>
         const request_data = async function(sl_year) {
@@ -82,5 +83,72 @@ function draw(words) {
         }
         request_data();
     </script>
+  </div>
+
+  <div id='chloropleth'>
+    <svg id="map" height="400" width="500"></svg>
+
+    <script>
+        const svg = d3.select("#map");
+        const width_map = svg.attr("width");
+        const height_map = svg.attr("height");
+        const margin = {
+            top: 20,
+            right: 20,
+            bottom: 20,
+            left: 20
+        };
+        const mapWidth = width_map - margin.left - margin.right;
+        const mapHeight = height_map - margin.top - margin.bottom;
+        const map = svg.append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        const request_all_data = async function () {
+            const  pitts = await d3.json("pitts.geojson");
+            console.log(pitts);
+            // var counties = topojson.feature(pitts, pitts.features);
+            // console.log(counties);
+            var statesMesh = topojson.mesh(pitts, pitts.features);
+            // const neightborhoods_mesh = topojson.mesh(sf,sf.objects.SFNeighborhoods);
+
+            var projection = d3.geoMercator().fitSize([mapWidth, mapHeight], pitts);
+            var path = d3.geoPath().projection(projection);
+
+            // let data = await d3.csv("processed_df.csv", d3.autoType);
+            
+            // let compExtent = d3.extent(data, d => d.pay);
+            // let compScale = d3.scaleSequential(d3.interpolateViridis).domain(compExtent);
+            // let payScale = d3.scaleQuantile()
+            //     .domain(d3.extent(data, d => d.pay))
+            //     .range([d3.interpolateViridis(1), d3.interpolateViridis(0.7), d3.interpolateViridis(0.5), d3.interpolateViridis(0.3), d3.interpolateViridis(0.1)]);
+
+            map.selectAll("path.neighborhood").data(pitts.features)
+                .join("path")
+                .attr("class", "neighborhood")
+                .attr("d", path)
+                // .style('fill','white')
+            
+            // map.append("path")
+            //     .datum(statesMesh)
+            //     .attr("class", "street_outline")
+            //     .attr('d',path)
+            //     .style('stroke','grey')
+            //     .style('stroke-width',"1px")
+            //     .style('fill','none')
+
+
+
+
+
+
+
+        }
+
+
+        request_all_data();
+    </script>
+</div>
+
+    
 </body>
 </html>
