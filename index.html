@@ -86,7 +86,7 @@ function draw(words) {
   </div>
 
   <div id='chloropleth'>
-    <svg id="map" height="400" width="500"></svg>
+    <svg id="map" height="700" width="700"></svg>
 
     <script>
         const svg = d3.select("#map");
@@ -114,7 +114,8 @@ function draw(words) {
             var projection = d3.geoMercator().fitSize([mapWidth, mapHeight], pitts);
             var path = d3.geoPath().projection(projection);
 
-            // let data = await d3.csv("processed_df.csv", d3.autoType);
+            let data = await d3.csv("yelp_pittsburgh.csv", d3.autoType);
+            console.log(data);
             
             // let compExtent = d3.extent(data, d => d.pay);
             // let compScale = d3.scaleSequential(d3.interpolateViridis).domain(compExtent);
@@ -127,6 +128,18 @@ function draw(words) {
                 .attr("class", "neighborhood")
                 .attr("d", path)
                 // .style('fill','white')
+
+            data.forEach( d => 
+                { d.Position = projection( [d.longitude, d.latitude] );
+            });
+
+            map.selectAll(".activities").data(data)
+                .join("circle")
+                .attr("r", 2)
+                .attr("fill", 'red')
+                .attr("opacity", 0.4)
+                .attr("cx", d => d.Position[0])
+                .attr("cy", d => d.Position[1]);
             
             // map.append("path")
             //     .datum(statesMesh)
