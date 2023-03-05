@@ -123,6 +123,16 @@
         </script>
     </div>
 
+
+    <div class="activities">
+      <button id="all">All Types</button>
+      <button id="food">Food</button>
+      <button id="arts">Art</button>
+      <button id="nightlife">Night Life</button>
+      <button id="active">Active</button>
+      <button id="shopping">Shopping</button>
+    </div>
+
     <div id='chloropleth'>
         <svg id="map" height="700" width="700"></svg>
 
@@ -141,7 +151,7 @@
             const map = svg.append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-            const request_all_data = async function() {
+            const request_all_data = async function(sl_type) {
                 const pitts = await d3.json("pitts.geojson");
                 console.log(pitts);
                 // var counties = topojson.feature(pitts, pitts.features);
@@ -153,7 +163,16 @@
                 var path = d3.geoPath().projection(projection);
 
                 let data = await d3.csv("yelp_pittsburgh.csv", d3.autoType);
-                console.log(data);
+
+                const request_map = async function(sl_type) {
+
+                  let data_ready;
+                  if (sl_type != "all"){
+                    data_ready = data.filter(d => d.type === sl_type);
+                  }else{
+                    data_ready = data;
+                  }
+                  console.log(data_ready);
 
                 // let compExtent = d3.extent(data, d => d.pay);
                 // let compScale = d3.scaleSequential(d3.interpolateViridis).domain(compExtent);
@@ -161,23 +180,65 @@
                 //     .domain(d3.extent(data, d => d.pay))
                 //     .range([d3.interpolateViridis(1), d3.interpolateViridis(0.7), d3.interpolateViridis(0.5), d3.interpolateViridis(0.3), d3.interpolateViridis(0.1)]);
 
-                map.selectAll("path.neighborhood").data(pitts.features)
-                    .join("path")
-                    .attr("class", "neighborhood")
-                    .attr("d", path)
-                    // .style('fill','white')
+                    map.selectAll("path.neighborhood").data(pitts.features)
+                        .join("path")
+                        .attr("class", "neighborhood")
+                        .attr("d", path)
+                        // .style('fill','white')
 
-                data.forEach(d => {
-                    d.Position = projection([d.longitude, d.latitude]);
-                });
+                    data.forEach(d => {
+                        d.Position = projection([d.longitude, d.latitude]);
+                    });
 
-                map.append("g").selectAll(".activities").data(data).enter().append('image')          .attr("xlink:href", d => {            
-                    let tp = d.type;            
-                    return tp + ".png";
+                    // let statesPath = map.selectAll("path.state")
+                    //         .data(pitts.features)
+                    //         .join(
+                    //             enter => enter.append("path").attr("d", path)
+                    //             .attr("class", "state")
+                    //             .style("fill", d => payScale(
+                    //                 stateIdCounts[d.id])).call(enter => enter.transition().attr("opacity", 1)),
+                    //             update => update.call(update => update.transition().style("fill", d => payScale(
+                    //                 stateIdCounts[d.id]))),
+                    //             exit => exit.call(exit => exit.transition().attr('opacity', 0).remove())
+                    //         );
 
-                              
-                })          .attr("x", d => d.Position[0])          .attr("y", d =>             d.Position[1]          )          .attr("width", 10)          .attr("height", 10);
+                    
+                    // if (sl_type != "all"){
+                      map.selectAll('image').remove();
 
+                    map.selectAll("image.activities")
+                      .data(data_ready)
+                      .join(
+                        enter => enter.append('image').attr("xlink:href", d => {
+                        let tp = d.type;
+                        return tp + ".png";
+                      })
+                      .attr("x", d => d.Position[0])
+                      .attr("y", d => d.Position[1])
+                      .attr("width", 10)
+                      .attr("height", 10)
+                      .call(enter => enter.transition().attr("opacity", 1)),
+                        update => update.call(update => update.transition().style("opacity",d => {
+                          console.log('update');
+                          return 0;})),
+                        exit => exit.call(exit => exit.transition().attr("opacity",0).remove())
+                      );
+
+
+                      
+
+
+                    //   .enter()
+                    //   .append('image')
+                    //   .attr("xlink:href", d => {
+                    //     let tp = d.type;
+                    //     return tp + ".png";
+                    // })
+                    
+
+                }
+                request_map(sl_type);
+                
                 // map.append("path")
                 //     .datum(statesMesh)
                 //     .attr("class", "street_outline")
@@ -186,16 +247,35 @@
                 //     .style('stroke-width',"1px")
                 //     .style('fill','none')
 
-
-
-
-
-
-
             }
 
 
-            request_all_data();
+            request_all_data("all");
+
+            d3.select("button#all").on("click", function (event) {
+                    let type = event.target.id;
+                    request_all_data("all");
+            });
+            d3.select("button#arts").on("click", function (event) {
+                    let type = event.target.id;
+                    request_all_data(type);
+            });
+            d3.select("button#shopping").on("click", function (event) {
+                    let type = event.target.id;
+                    request_all_data(type);
+            });
+            d3.select("button#active").on("click", function (event) {
+                    let type = event.target.id;
+                    request_all_data(type);
+            });
+            d3.select("button#food").on("click", function (event) {
+                    let type = event.target.id;
+                    request_all_data(type);
+            });
+            d3.select("button#nightlife").on("click", function (event) {
+                    let type = event.target.id;
+                    request_all_data(type);
+            });
         </script>
     </div>
 
