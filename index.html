@@ -6,209 +6,200 @@
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://d3js.org/topojson.v3.min.js"></script>
     <!-- Load d3-cloud -->
-<script src="https://cdn.jsdelivr.net/gh/holtzy/D3-graph-gallery@master/LIB/d3.layout.cloud.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/holtzy/D3-graph-gallery@master/LIB/d3.layout.cloud.js"></script>
 
 </head>
+
 <body>
-  <div class = "word_cloud">
-    <svg id="cloud" height="400" width="500"></svg>
-    <script>
-        const request_data = async function(sl_year) {
-                    const yelp = await d3.csv("yelp_pittsburgh.csv",d3.autoType);
-                    var myWords = [{word: "Running", size: "10"}, {word: "Surfing", size: "20"}, {word: "Climbing", size: "40"}, {word: "Kiting", size: "30"}, {word: "Sailing", size: "20"}, {word: "Snowboarding", size: "50"} ]
+    <div class="word_cloud">
+        <svg id="cloud" height="400" width="500"></svg>
+        <script>
+            const request_data = async function(sl_year) {
+                const yelp = await d3.csv("yelp_pittsburgh.csv", d3.autoType);
+                var myWords = [{
+                    word: "Running",
+                    size: "10"
+                }, {
+                    word: "Surfing",
+                    size: "20"
+                }, {
+                    word: "Climbing",
+                    size: "40"
+                }, {
+                    word: "Kiting",
+                    size: "30"
+                }, {
+                    word: "Sailing",
+                    size: "20"
+                }, {
+                    word: "Snowboarding",
+                    size: "50"
+                }]
 
-                    let canvas = d3.select("svg#cloud");
-// set the dimensions and margins of the graph
-const margin = {top: 10, right: 10, bottom: 10, left: 10};
-    const width = canvas.attr('width') - margin.left - margin.right;
-    const height = canvas.attr('height') - margin.top - margin.bottom;
-let snippets = [];
+                let canvas = d3.select("svg#cloud");
+                // set the dimensions and margins of the graph
+                const margin = {
+                    top: 10,
+                    right: 10,
+                    bottom: 10,
+                    left: 10
+                };
+                const width = canvas.attr('width') - margin.left - margin.right;
+                const height = canvas.attr('height') - margin.top - margin.bottom;
+                let snippets = [];
 
-yelp.forEach((d,i) => {
-snippets[i] = d['snippet'];
-})
-snp = snippets[4];
+                yelp.forEach((d, i) => {
+                    snippets[i] = d['snippet'];
+                })
+                snp = snippets[4];
 
-let words = snp.replaceAll('\n',' ').split(' ');
-console.log(words);
-let word_freq = {};
-words.forEach(d=>{
-    if (word_freq[d] === undefined){
-        word_freq[d] =1;
-    }else{word_freq[d] +=1;
+                let words = snp.replaceAll('\n', ' ').split(' ');
+                console.log(words);
+                let word_freq = {};
+                words.forEach(d => {
+                    if (word_freq[d] === undefined) {
+                        word_freq[d] = 1;
+                    } else {
+                        word_freq[d] += 1;
 
-    }
-     
-});
+                    }
 
-let fontExtent = d3.extent(Object.values(word_freq));
-const minFont = 10;
-const maxFont = 50;
-let fontScale = d3.scaleLinear().domain(fontExtent).range([minFont,maxFont]);
-// append the svg object to the body of the page
-let svg =canvas
-  .append("g")
-    .attr("transform",
-          "translate(" + margin.left + "," + margin.top + ")");
-
-// Constructs a new cloud layout instance. It run an algorithm to find the position of words that suits your requirements
-// Wordcloud features that are different from one word to the other must be here
-var layout = d3.layout.cloud()
-  .size([width, height])
-  .words(Object.keys(word_freq).map(function(d) { return {text: d, size: fontScale(word_freq[d])}; }))
-  .padding(5)        //space between words
-  .rotate(function() { return ~~(Math.random() * 2) * 90; })
-  .fontSize(function(d) {return d.size; })      // font size of words
-  .on("end", draw);
-layout.start();
-
-// This function takes the output of 'layout' above and draw the words
-// Wordcloud features that are THE SAME from one word to the other can be here
-function draw(words) {
-  svg
-    .append("g")
-      .attr("transform", "translate(" + layout.size()[0] / 2 + "," + layout.size()[1] / 2 + ")")
-      .selectAll("text")
-        .data(words)
-      .enter().append("text")
-        .style("font-size", function(d) { return d.size; })
-        .style("fill", "#69b3a2")
-        .attr("text-anchor", "middle")
-        .style("font-family", "Impact")
-        .attr("transform", function(d) {
-          return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
-        })
-        .text(function(d) { return d.text; });
-}
-        }
-        request_data();
-    </script>
-  </div>
-
-  <div id='chloropleth'>
-    <svg id="map" height="700" width="700"></svg>
-
-    <script>
-        const svg = d3.select("#map");
-        const width_map = svg.attr("width");
-        const height_map = svg.attr("height");
-        const margin = {
-            top: 20,
-            right: 20,
-            bottom: 20,
-            left: 20
-        };
-        const mapWidth = width_map - margin.left - margin.right;
-        const mapHeight = height_map - margin.top - margin.bottom;
-        const map = svg.append("g")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-        const request_all_data = async function () {
-            const  pitts = await d3.json("pitts.geojson");
-            console.log(pitts);
-            // var counties = topojson.feature(pitts, pitts.features);
-            // console.log(counties);
-            var statesMesh = topojson.mesh(pitts, pitts.features);
-            // const neightborhoods_mesh = topojson.mesh(sf,sf.objects.SFNeighborhoods);
-
-            var projection = d3.geoMercator().fitSize([mapWidth, mapHeight], pitts);
-            var path = d3.geoPath().projection(projection);
-
-            let data = await d3.csv("yelp_pittsburgh.csv", d3.autoType);
-            console.log(data);
-            
-            // let compExtent = d3.extent(data, d => d.pay);
-            // let compScale = d3.scaleSequential(d3.interpolateViridis).domain(compExtent);
-            // let payScale = d3.scaleQuantile()
-            //     .domain(d3.extent(data, d => d.pay))
-            //     .range([d3.interpolateViridis(1), d3.interpolateViridis(0.7), d3.interpolateViridis(0.5), d3.interpolateViridis(0.3), d3.interpolateViridis(0.1)]);
-
-            map.selectAll("path.neighborhood").data(pitts.features)
-                .join("path")
-                .attr("class", "neighborhood")
-                .attr("d", path)
-                // .style('fill','white')
-
-            data.forEach( d => 
-                { d.Position = projection( [d.longitude, d.latitude] );
-            });
-
-            // map.selectAll(".activities").data(data)
-            //     .join("circle")
-            //     .attr("r", 2)
-            //     .attr("fill", 'red')
-            //     .attr("opacity", 0.4)
-            //     .attr("cx", d => d.Position[0])
-            //     .attr("cy", d => d.Position[1]);
-            
-            // map.append("path")
-            //     .datum(statesMesh)
-            //     .attr("class", "street_outline")
-            //     .attr('d',path)
-            //     .style('stroke','grey')
-            //     .style('stroke-width',"1px")
-            //     .style('fill','none')
-
-
-            // pan and zoom
-            var zoom = d3.zoom()
-                      .scaleExtent([1,20])
-                      .translateExtent([[-50,-50],[mapWidth+50,mapHeight+50]])  // to lock to edges
-                      .on("zoom", mapZoomed);
-    
-            svg.call(zoom);
-        
-            svg.call(zoom.transform, d3.zoomIdentity); // Executes zoomed() once because we technically have changed the transform
-            
-        
-            function mapZoomed({transform}) {       // Destructuring here directly pulls and assigns the transform
-              map.attr("transform", transform.toString() );
-        
-              map.select(".activities")
-                          .style("stroke-width", 2 / transform.k);
-              // viewport.select(".county-outline")
-              //             .style("stroke-width", 1 / transform.k);
-              
-
-                data.forEach( d => {
-                  d.Position = projection( [d.longitude, d.latitude] );
                 });
 
-                data.filter(l => l.Position != null)
-                // console.log(longlat)
+                let fontExtent = d3.extent(Object.values(word_freq));
+                const minFont = 10;
+                const maxFont = 50;
+                let fontScale = d3.scaleLinear().domain(fontExtent).range([minFont, maxFont]);
+                // append the svg object to the body of the page
+                let svg = canvas
+                    .append("g")
+                    .attr("transform",
+                        "translate(" + margin.left + "," + margin.top + ")");
 
-                map.selectAll(".activities").data(data)
-                .join("circle")
-                .attr("r", 3)
+                // Constructs a new cloud layout instance. It run an algorithm to find the position of words that suits your requirements
+                // Wordcloud features that are different from one word to the other must be here
+                var layout = d3.layout.cloud()
+                    .size([width, height])
+                    .words(Object.keys(word_freq).map(function(d) {
+                        return {
+                            text: d,
+                            size: fontScale(word_freq[d])
+                        };
+                    }))
+                    .padding(5) //space between words
+                    .rotate(function() {
+                        return ~~(Math.random() * 2) * 90;
+                    })
+                    .fontSize(function(d) {
+                        return d.size;
+                    }) // font size of words
+                    .on("end", draw);
+                layout.start();
 
-                .attr("fill", "red")
-                .style('opacity',0.5)
+                // This function takes the output of 'layout' above and draw the words
+                // Wordcloud features that are THE SAME from one word to the other can be here
+                function draw(words) {
+                    svg
+                        .append("g")
+                        .attr("transform", "translate(" + layout.size()[0] / 2 + "," + layout.size()[1] / 2 + ")")
+                        .selectAll("text")
+                        .data(words)
+                        .enter().append("text")
+                        .style("font-size", function(d) {
+                            return d.size;
+                        })
+                        .style("fill", "#69b3a2")
+                        .attr("text-anchor", "middle")
+                        .style("font-family", "Impact")
+                        .attr("transform", function(d) {
+                            return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+                        })
+                        .text(function(d) {
+                            return d.text;
+                        });
+                }
+            }
+            request_data();
+        </script>
+    </div>
 
-                .attr("cx", d => d.Position[0])
+    <div id='chloropleth'>
+        <svg id="map" height="700" width="700"></svg>
 
-                .attr("cy", d => d.Position[1]);
+        <script>
+            const svg = d3.select("#map");
+            const width_map = svg.attr("width");
+            const height_map = svg.attr("height");
+            const margin = {
+                top: 20,
+                right: 20,
+                bottom: 20,
+                left: 20
+            };
+            const mapWidth = width_map - margin.left - margin.right;
+            const mapHeight = height_map - margin.top - margin.bottom;
+            const map = svg.append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-                // map.selectAll("circle").remove();
+            const request_all_data = async function() {
+                const pitts = await d3.json("pitts.geojson");
+                console.log(pitts);
+                // var counties = topojson.feature(pitts, pitts.features);
+                // console.log(counties);
+                var statesMesh = topojson.mesh(pitts, pitts.features);
+                // const neightborhoods_mesh = topojson.mesh(sf,sf.objects.SFNeighborhoods);
+
+                var projection = d3.geoMercator().fitSize([mapWidth, mapHeight], pitts);
+                var path = d3.geoPath().projection(projection);
+
+                let data = await d3.csv("yelp_pittsburgh.csv", d3.autoType);
+                console.log(data);
+
+                // let compExtent = d3.extent(data, d => d.pay);
+                // let compScale = d3.scaleSequential(d3.interpolateViridis).domain(compExtent);
+                // let payScale = d3.scaleQuantile()
+                //     .domain(d3.extent(data, d => d.pay))
+                //     .range([d3.interpolateViridis(1), d3.interpolateViridis(0.7), d3.interpolateViridis(0.5), d3.interpolateViridis(0.3), d3.interpolateViridis(0.1)]);
+
+                map.selectAll("path.neighborhood").data(pitts.features)
+                    .join("path")
+                    .attr("class", "neighborhood")
+                    .attr("d", path)
+                    // .style('fill','white')
+
+                data.forEach(d => {
+                    d.Position = projection([d.longitude, d.latitude]);
+                });
+
+                map.append("g").selectAll(".activities").data(data).enter().append('image')          .attr("xlink:href", d => {            
+                    let tp = d.type;            
+                    return tp + ".png";
+
+                              
+                })          .attr("x", d => d.Position[0])          .attr("y", d =>             d.Position[1]          )          .attr("width", 10)          .attr("height", 10);
+
+                // map.append("path")
+                //     .datum(statesMesh)
+                //     .attr("class", "street_outline")
+                //     .attr('d',path)
+                //     .style('stroke','grey')
+                //     .style('stroke-width',"1px")
+                //     .style('fill','none')
 
 
 
 
-        }
 
 
 
+            }
 
 
+            request_all_data();
+        </script>
+    </div>
 
 
-
-        }
-
-
-        request_all_data();
-    </script>
-</div>
-
-    
 </body>
+
 </html>
