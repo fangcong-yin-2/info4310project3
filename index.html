@@ -1,7 +1,7 @@
 <html>
 
 <head>
-    <title>INFO 4310 Project 2</title>
+    <title>INFO 4310 Project 3</title>
     <meta charset="UTF-8">
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://d3js.org/topojson.v3.min.js"></script>
@@ -16,79 +16,57 @@
         margin-left: 20px;
         margin-right: 20px;
     }
-
-    /*       
-      .gridlines line {
-          stroke: rgb(223, 223, 223);
-      }
-      
-      .gridlines .domain {
-          stroke: none;
-      } */
-
+    
     h4 {
         font-size: 40px;
         font-weight: 200;
-        font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
         text-align: center;
     }
+    
     .state {
         fill: white;
     }
-
+    
     .outline {
         fill: none;
         stroke: gray;
         stroke-width: 1px;
     }
-
-    /* .main {
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-    } */
-
+    
     .column {
         justify-content: center;
     }
-
-    .bottom{
+    
+    .bottom {
         display: flex;
         flex-direction: row;
         align-items: center;
         justify-content: space-around;
     }
-
-    .selections{
+    
+    .selections {
         width: 100%;
         display: flex;
         flex-direction: column;
         justify-content: space-around;
     }
-
-    .types{
+    
+    .types {
         display: flex;
         flex-direction: row;
     }
-
+    
     .middle {
         display: flex;
         flex-direction: column;
     }
-
+    
     .reminders {
         text-align: center;
         color: gray;
     }
-
-    /* 
-      .chloropleth{
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-      } */
-
-
+    
     #title {
         font-size: 80px;
         color: darkblue;
@@ -96,16 +74,16 @@
         font-weight: 600;
         margin-bottom: 0;
     }
-
+    
     #intro_p {
         width: 1200px;
         margin: auto;
     }
-
+    
     #reminder {
         font-weight: bold;
     }
-
+    
     #year-content {
         font-family: 'Helvetica Neue, Arial';
         font-weight: 500;
@@ -116,17 +94,12 @@
         margin-bottom: 0;
         margin-top: 0;
     }
-
+    
     #interaction {
         width: 600px;
         margin: auto;
     }
-
-    /* .right{
-          border-style: solid;
-          border-style: 1px;
-          height: 350px;
-      } */
+    
     #table {
         font-family: 'Helvetica Neue, Arial';
         font-weight: 70;
@@ -134,7 +107,7 @@
         fill: '#ccc';
         text-align: left;
     }
-
+    
     #table_title {
         font-family: 'Helvetica Neue, Arial';
         font-weight: bold;
@@ -142,21 +115,21 @@
         fill: '#ccc';
         text-align: center;
     }
-
+    
     .td {
         margin: 50px;
     }
-
+    
     .right {
         padding-top: 20px;
     }
-
+    
     .buttons {
         display: flex;
         flex-direction: row;
         justify-content: center;
     }
-
+    
     button {
         border-radius: 8px;
         transition-duration: 0.4s;
@@ -164,7 +137,7 @@
         row-gap: 10px;
         margin: 5px;
     }
-
+    
     button:hover {
         background-color: white;
         color: black;
@@ -173,114 +146,23 @@
 
 <body>
     <h4>Spending A Day in Pittsburgh!</h4>
-    
-    <div class="word_cloud">
-        <svg id="cloud" height="400" width="500"></svg>
-        <script>
-            const request_data = async function(sl_year) {
-                const yelp = await d3.csv("yelp_pittsburgh_new.csv", d3.autoType);
 
-                let canvas = d3.select("svg#cloud");
-                // set the dimensions and margins of the graph
-                const margin = {
-                    top: 10,
-                    right: 10,
-                    bottom: 10,
-                    left: 10
-                };
-                const width = canvas.attr('width') - margin.left - margin.right;
-                const height = canvas.attr('height') - margin.top - margin.bottom;
-                let snippets = [];
 
-                yelp.forEach((d, i) => {
-                    snippets[i] = d['snippet'];
-                })
-                snp = snippets[4];
-
-                let words = snp.replaceAll('\n', ' ').split(' ');
-                console.log(words);
-                let word_freq = {};
-                words.forEach(d => {
-                    if (word_freq[d] === undefined) {
-                        word_freq[d] = 1;
-                    } else {
-                        word_freq[d] += 1;
-
-                    }
-
-                });
-
-                let fontExtent = d3.extent(Object.values(word_freq));
-                const minFont = 10;
-                const maxFont = 50;
-                let fontScale = d3.scaleLinear().domain(fontExtent).range([minFont, maxFont]);
-                // append the svg object to the body of the page
-                let svg = canvas
-                    .append("g")
-                    .attr("transform",
-                        "translate(" + margin.left + "," + margin.top + ")");
-
-                // Constructs a new cloud layout instance. It run an algorithm to find the position of words that suits your requirements
-                // Wordcloud features that are different from one word to the other must be here
-                var layout = d3.layout.cloud()
-                    .size([width, height])
-                    .words(Object.keys(word_freq).map(function(d) {
-                        return {
-                            text: d,
-                            size: fontScale(word_freq[d])
-                        };
-                    }))
-                    .padding(5) //space between words
-                    .rotate(function() {
-                        return ~~(Math.random() * 2) * 90;
-                    })
-                    .fontSize(function(d) {
-                        return d.size;
-                    }) // font size of words
-                    .on("end", draw);
-                layout.start();
-
-                // This function takes the output of 'layout' above and draw the words
-                // Wordcloud features that are THE SAME from one word to the other can be here
-                function draw(words) {
-                    svg
-                        .append("g")
-                        .attr("transform", "translate(" + layout.size()[0] / 2 + "," + layout.size()[1] / 2 + ")")
-                        .selectAll("text")
-                        .data(words)
-                        .enter().append("text")
-                        .style("font-size", function(d) {
-                            return d.size;
-                        })
-                        .style("fill", "#69b3a2")
-                        .attr("text-anchor", "middle")
-                        .style("font-family", "Impact")
-                        .attr("transform", function(d) {
-                            return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
-                        })
-                        .text(function(d) {
-                            return d.text;
-                        });
-                }
-            }
-            request_data();
-        </script>
-    </div>
 
 
 
     <div class="main">
         <div class="column">
-            <div class = "bottom">
-                <div class = "selections">
-                    <div id = "filter_neighborhoods">
+            <div class="bottom">
+                <div class="selections">
+                    <div id="filter_neighborhoods">
                         <p>Select by neighborhoods</p>
-                
+
                     </div>
                     <div class="activities">
                         <p>Select by activity types</p>
                         <div class="types">
-                            
+
                             <button id="all">All Types</button>
                             <button id="Food">Food</button>
                             <button id="Arts">Art</button>
@@ -292,15 +174,15 @@
                             <p id="dropdown_text" style="visibility:hidden">Select by restaurant cuisine or restaurant types</p>
                             <div class="cuisine"></div>
                             <div class="food_type"></div>
-        
+
                         </div>
-        
+
                     </div>
                 </div>
 
                 <div id='chloropleth'>
                     <svg id="map" height="500" width="600"></svg>
-    
+
                     <script>
                         const svg = d3.select("#map");
                         const width_map = svg.attr("width");
@@ -315,50 +197,50 @@
                         const mapHeight = height_map - margin.top - margin.bottom;
                         const map = svg.append("g")
                             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-                        
+
                         let n_already = false;
                         let clicked_n = false;
                         let clicked_food = false;
                         let clicked_cuisine = false;
                         let clicked_type = false;
                         let dropButton_cuisine;
-                    
-    
-    
+
+
+
                         let dropButton_type;
 
-                                                    
 
-    
-                        const request_all_data = async function (sl_type) {
+
+
+                        const request_all_data = async function(sl_type) {
                             const pitts = await d3.json("pitts.geojson");
                             // var counties = topojson.feature(pitts, pitts.features);
                             // console.log(counties);
                             var statesMesh = topojson.mesh(pitts, pitts.features);
                             // const neightborhoods_mesh = topojson.mesh(sf,sf.objects.SFNeighborhoods);
-    
+
                             var projection = d3.geoMercator().fitSize([mapWidth, mapHeight], pitts);
                             var path = d3.geoPath().projection(projection);
-    
+
                             let data = await d3.csv("yelp_pittsburgh_new.csv", d3.autoType);
                             let n = [];
-                            for (let i = 0 ; i < data.length; i++){
-                                    if (!n.includes(data[i].neighborhood)){
-                                        n.push(data[i].neighborhood);
-                                    }
+                            for (let i = 0; i < data.length; i++) {
+                                if (!n.includes(data[i].neighborhood)) {
+                                    n.push(data[i].neighborhood);
+                                }
                             }
-    
 
-                            const request_map = async function (sl_type) {
+
+                            const request_map = async function(sl_type) {
                                 console.log(sl_type)
-    
+
                                 let data_ready;
                                 // console.log(n)
                                 if (sl_type != "all") {
-                                    if (n.includes(sl_type)){
+                                    if (n.includes(sl_type)) {
                                         data_ready = data.filter(d => d.neighborhood === sl_type)
 
-                                    }else{
+                                    } else {
                                         if (clicked_food == true) {
                                             if (clicked_cuisine == true || clicked_type == true) {
                                                 let temp = data.filter(d => d.type === 'Food');
@@ -368,34 +250,34 @@
                                                 console.log(111)
                                             }
                                         } else {
-                                                data_ready = data.filter(d => d.type === sl_type);
-            
+                                            data_ready = data.filter(d => d.type === sl_type);
+
                                         }
                                     }
-                                    
-    
+
+
                                 } else {
                                     data_ready = data;
-    
+
                                 }
                                 console.log(data_ready);
-    
+
                                 // let compExtent = d3.extent(data, d => d.pay);
                                 // let compScale = d3.scaleSequential(d3.interpolateViridis).domain(compExtent);
                                 // let payScale = d3.scaleQuantile()
                                 //     .domain(d3.extent(data, d => d.pay))
                                 //     .range([d3.interpolateViridis(1), d3.interpolateViridis(0.7), d3.interpolateViridis(0.5), d3.interpolateViridis(0.3), d3.interpolateViridis(0.1)]);
-    
+
                                 map.selectAll("path.neighborhood").data(pitts.features)
                                     .join("path")
                                     .attr("class", "neighborhood")
                                     .attr("d", path)
-                                // .style('fill','white')
-    
+                                    // .style('fill','white')
+
                                 data.forEach(d => {
                                     d.Position = projection([d.longitude, d.latitude]);
                                 });
-    
+
                                 // let statesPath = map.selectAll("path.state")
                                 //         .data(pitts.features)
                                 //         .join(
@@ -407,11 +289,11 @@
                                 //                 stateIdCounts[d.id]))),
                                 //             exit => exit.call(exit => exit.transition().attr('opacity', 0).remove())
                                 //         );
-    
-    
+
+
                                 // if (sl_type != "all"){
                                 map.selectAll('image').remove();
-    
+
                                 map.selectAll("image")
                                     .data(data_ready)
                                     .join(
@@ -419,22 +301,22 @@
                                             let tp = d.type;
                                             return tp + ".png";
                                         })
-                                            .attr("x", d => d.Position[0])
-                                            .attr("y", d => d.Position[1])
-                                            .attr("width", 20)
-                                            .attr("height", 20)
-                                            .attr('class', 'icons')
-                                            .call(enter => enter.transition().attr("opacity", 1)),
+                                        .attr("x", d => d.Position[0])
+                                        .attr("y", d => d.Position[1])
+                                        .attr("width", 20)
+                                        .attr("height", 20)
+                                        .attr('class', 'icons')
+                                        .call(enter => enter.transition().attr("opacity", 1)),
                                         // update => update.call(update => update.transition().style("opacity", d => {
                                         //     console.log('update');
                                         //     return 0;
                                         // })),
                                         // exit => exit.call(exit => exit.transition().attr("opacity", 0).remove())
                                     );
-    
-    
-    
-    
+
+
+
+
                                 var zoom = d3.zoom()
                                     .scaleExtent([1, 20])
                                     .translateExtent([
@@ -442,42 +324,42 @@
                                         [mapWidth + 50, mapHeight + 50]
                                     ]) // to lock to edges
                                     .on("zoom", mapZoomed);
-    
+
                                 svg.call(zoom);
-    
+
                                 svg.call(zoom.transform, d3.zoomIdentity); // Executes zoomed() once because we technically have changed the transform
-    
-    
+
+
                                 function mapZoomed({
                                     transform
                                 }) { // Destructuring here directly pulls and assigns the transform
                                     map.attr("transform", transform.toString());
-    
+
                                     map.selectAll("image").
-                                        attr('width', 20 / transform.k).
-                                        attr('height', 20 / transform.k);
-    
+                                    attr('width', 20 / transform.k).
+                                    attr('height', 20 / transform.k);
+
                                     data.forEach(d => {
                                         d.Position = projection([d.longitude, d.latitude]);
                                     });
-    
+
                                     data.filter(l => l.Position != null)
-    
+
                                 }
-    
+
                                 d3.selectAll(".icons").on("click", clicked_map);
-    
+
                                 function clicked_map(event, d) {
-    
+
                                     console.log(event);
-    
+
                                     requestData_table(event);
-    
+
                                 }
-    
+
                             }
                             request_map(sl_type);
-    
+
                             // map.append("path")
                             //     .datum(statesMesh)
                             //     .attr("class", "street_outline")
@@ -485,15 +367,15 @@
                             //     .style('stroke','grey')
                             //     .style('stroke-width',"1px")
                             //     .style('fill','none')
-    
-    
+
+
                             function show_food() {
                                 // if (button_already == true){
                                 //     console.log(111);
                                 // }
                                 // clicked_food = true;
                                 // button_already = true;
-                                d3.select("#dropdown_text").style("visibility","visible")
+                                d3.select("#dropdown_text").style("visibility", "visible")
                                 clicked_food = true;
                                 let all_food_types = [];
                                 data.forEach((item) => {
@@ -501,45 +383,45 @@
                                         all_food_types.push(item.category);
                                     }
                                 });
-    
+
                                 let cuisines = ['select', 'Indpak', 'Italian', 'Newamerican', 'Chinese', 'Thai', 'Mexican', 'French', 'Japanese', 'Vietnamese'];
                                 let types_of_food = ['select', 'Coffee', 'Donuts', 'Pizza', 'Sandwiches', 'Bakeries', 'Cafes', 'Sushi', 'Ethnicmarkets'];
-    
+
                                 function add_cuisine_button() {
                                     dropButton_cuisine = d3.select('.cuisine').append('select');
                                     dropButton_cuisine.selectAll('options_').data(cuisines)
                                         .enter()
                                         .append('option')
-                                        .text(function (d) {
+                                        .text(function(d) {
                                             return d
                                         })
-                                        .attr('value', function (d) {
+                                        .attr('value', function(d) {
                                             return d
                                         })
-    
+
                                 }
                                 add_cuisine_button();
-    
+
                                 // let dropButton_type;
                                 function add_type_button() {
                                     dropButton_type = d3.select('.food_type').append('select');
                                     dropButton_type.selectAll('options_').data(types_of_food)
                                         .enter()
                                         .append('option')
-                                        .text(function (d) {
+                                        .text(function(d) {
                                             return d
                                         })
-                                        .attr('value', function (d) {
+                                        .attr('value', function(d) {
                                             return d
                                         })
-    
+
                                 }
                                 add_type_button();
-    
-    
-                                dropButton_cuisine.on('change', function (d) {
+
+
+                                dropButton_cuisine.on('change', function(d) {
                                     let selected_category = d3.select(this).property("value");
-    
+
                                     if (selected_category == 'select') {
                                         clicked_cuisine = false;
                                     } else {
@@ -552,11 +434,11 @@
                                     }
                                     request_map(selected_category);
                                 })
-    
-    
-    
-                                dropButton_type.on('change', function (d) {
-    
+
+
+
+                                dropButton_type.on('change', function(d) {
+
                                     let selected_category = d3.select(this).property("value");
                                     // clicked_food = true;
                                     if (selected_category == 'select') {
@@ -572,19 +454,19 @@
                                     }
                                     request_map(selected_category);
                                 })
-    
-    
-    
+
+
+
                             }
-    
+
                             if (sl_type == "Food" && clicked_food != true) {
                                 show_food();
                             }
-                            
+
                             // let n;
-                            
-                            
-                            function show_neigh(){
+
+
+                            function show_neigh() {
                                 n_already = true;
                                 // n = [];
                                 // for (let i = 0 ; i < data.length; i++){
@@ -592,33 +474,33 @@
                                 //         n.push(data[i].neighborhood);
                                 //     }
                                 // }
-                                
+
                                 // console.log(d3.select('div#filter_neighborhoods').append('p'));
-                                for (let i = 0; i < n.length; i++){
-                                    d3.select('div#filter_neighborhoods').append('button').attr('id',n[i])
+                                for (let i = 0; i < n.length; i++) {
+                                    d3.select('div#filter_neighborhoods').append('button').attr('id', n[i])
                                         .text(n[i])
                                 }
 
                             }
-                            if (!n_already){
+                            if (!n_already) {
                                 show_neigh();
                                 // neighborhoods = n;
                             }
-    
-    
-    
+
+
+
                         }
-    
-    
+
+
                         // map.selectAll(".icons").on("click", clicked_map);
-    
-    
-    
+
+
+
                         // console.log
                         request_all_data("all");
 
-                        
-    
+
+
                         function remove_all_buttons() {
                             // if (clicked_food == true) {
                             //     console.log(111);
@@ -635,45 +517,45 @@
                             clicked_food = false;
                             clicked_cuisine = false;
                             clicked_type = false;
-                            d3.select("#dropdown_text").style("visibility","hidden")
+                            d3.select("#dropdown_text").style("visibility", "hidden")
                         }
 
-                        d3.select("div#filter_neighborhoods").on('click',function(event){
+                        d3.select("div#filter_neighborhoods").on('click', function(event) {
                             clicked_n = true;
                             request_all_data(event.target.id);
                         })
-    
-                        d3.select("button#all").on("click", function (event) {
-                
+
+                        d3.select("button#all").on("click", function(event) {
+
                             let type = event.target.id;
                             request_all_data("all");
                             remove_all_buttons();
-    
+
                         });
-                        d3.select("button#arts").on("click", function (event) {
+                        d3.select("button#arts").on("click", function(event) {
                             console.log(event);
                             let type = event.target.id;
                             request_all_data(type);
                             remove_all_buttons();
                         });
-                        d3.select("button#shopping").on("click", function (event) {
+                        d3.select("button#shopping").on("click", function(event) {
                             let type = event.target.id;
                             request_all_data(type);
                             remove_all_buttons();
                         });
-                        d3.select("button#active").on("click", function (event) {
+                        d3.select("button#active").on("click", function(event) {
                             let type = event.target.id;
                             request_all_data(type);
                             remove_all_buttons();
                         });
-                        d3.select("button#food").on("click", function (event) {
+                        d3.select("button#food").on("click", function(event) {
                             let type = event.target.id;
                             request_all_data(type);
-                            if (clicked_food == true){
+                            if (clicked_food == true) {
                                 remove_all_buttons();
                             }
                         });
-                        d3.select("button#nightlife").on("click", function (event) {
+                        d3.select("button#nightlife").on("click", function(event) {
                             let type = event.target.id;
                             request_all_data(type);
                             remove_all_buttons();
@@ -681,10 +563,10 @@
                     </script>
                 </div>
             </div>
-    
 
-            </div>
-            
+
+        </div>
+
 
         <div class="right">
 
@@ -748,56 +630,30 @@
                     const minFont = 10;
                     const maxFont = 50;
                     let fontScale = d3.scaleLinear().domain(fontExtent).range([minFont, maxFont]);
-                    // append the svg object to the body of the page
                     canvas.selectAll("g").remove();
                     let cloud_svg = canvas
                         .append("g")
                         .attr("transform",
                             "translate(" + margin.left + "," + margin.top + ")");
 
-                    // Constructs a new cloud layout instance. It run an algorithm to find the position of words that suits your requirements
-                    // Wordcloud features that are different from one word to the other must be here
                     var layout = d3.layout.cloud()
                         .size([width, height])
-                        .words(Object.keys(word_freq).map(function (d) {
-                            return {
-                                text: d,
-                                size: fontScale(word_freq[d])
-                            };
-                        }))
-                        .padding(5) //space between words
-                        .rotate(function () {
-                            return ~~(Math.random() * 2) * 90;
-                        })
-                        .fontSize(function (d) {
-                            return d.size;
-                        }) // font size of words
+                        .words(Object.keys(word_freq).map(d => ({
+                            text: d,
+                            size: fontScale(word_freq[d])
+                        })))
+                        // .padding(5) //space between words
+                        .rotate(
+                            // return ~~(Math.random() * 2) * 90;
+                            Math.random() * 90
+                        )
+                        .fontSize(d =>
+                            d.size
+                        )
                         .on("end", draw);
                     layout.start();
 
-                    // This function takes the output of 'layout' above and draw the words
-                    // Wordcloud features that are THE SAME from one word to the other can be here
                     function draw(words) {
-                        /*
-                          svg
-                              .append("g")
-                              .attr("transform", "translate(" + layout.size()[0] / 2 + "," + layout.size()[1] / 2 + ")")
-                              .selectAll("text")
-                              .data(words)
-                              .enter().append("text")
-                              .style("font-size", function(d) {
-                                  return d.size;
-                              })
-                              .style("fill", "#69b3a2")
-                              .attr("text-anchor", "middle")
-                              .style("font-family", "Impact")
-                              .attr("transform", function(d) {
-                                  return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
-                              })
-                              .text(function(d) {
-                                  return d.text;
-                              });
-                              */
 
                         cloud_svg
                             .append("g")
@@ -805,20 +661,20 @@
                             .selectAll("text")
                             .data(words).join(enter =>
                                 enter
-                                    .append("text").style("font-size", function (d) {
-                                        return d.size;
-                                    })
-                                    .style("fill", "#69b3a2")
-                                    .attr("text-anchor", "middle")
-                                    .attr("transform", function (d) {
-                                        return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
-                                    })
-                                    .text(function (d) {
-                                        return d.text;
-                                    }).call(enter => enter.transition().attr("opacity", 0.8)));
+                                .append("text").style("font-size", d =>
+                                    d.size
+                                )
+                                .style("fill", "#69b3a2")
+                                .attr("text-anchor", "middle")
+                                .attr("transform", d =>
+                                    "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")"
+                                )
+                                .text(d =>
+                                    d.text
+                                ).call(enter => enter.transition().attr("opacity", 0.8)));
                     }
                 }
-                const requestData_table = async function (e) {
+                const requestData_table = async function(e) {
                     let data = await d3.csv("yelp_pittsburgh_new.csv", d3.autoType);
 
 
@@ -864,8 +720,8 @@
                     request_word_cloud(data);
                 }
 
-            // requestData_table(2007, "all");
-            // requestData_table(""); -->
+                // requestData_table(2007, "all");
+                // requestData_table(""); -->
             </script>
 
         </div>
