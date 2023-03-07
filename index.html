@@ -42,14 +42,33 @@
         stroke-width: 1px;
     }
 
-    .main {
+    /* .main {
         display: flex;
         flex-direction: row;
         justify-content: center;
-    }
+    } */
 
     .column {
         justify-content: center;
+    }
+
+    .bottom{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-around;
+    }
+
+    .selections{
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+    }
+
+    .types{
+        display: flex;
+        flex-direction: row;
     }
 
     .middle {
@@ -69,17 +88,6 @@
           justify-content: center;
       } */
 
-    .mapLegend {
-        background-color: rgb(228, 243, 255);
-        text-align: center;
-    }
-
-    #mapLegendNote {
-        text-align: center;
-        margin: 0;
-        font-size: 13px;
-        width: 500px;
-    }
 
     #title {
         font-size: 80px;
@@ -164,8 +172,8 @@
 </style>
 
 <body>
-    <h4>Spending A Day in SF</h4>
-    <!---
+    <h4>Spending A Day in Pittsburgh!</h4>
+    
     <div class="word_cloud">
         <svg id="cloud" height="400" width="500"></svg>
         <script>
@@ -258,354 +266,425 @@
             request_data();
         </script>
     </div>
--->
+
 
 
     <div class="main">
         <div class="column">
-            <div class="activities">
-                <div class="types">
-                    <button id="all">All Types</button>
-                    <button id="food">Food</button>
-                    <button id="arts">Art</button>
-                    <button id="nightlife">Night Life</button>
-                    <button id="active">Active</button>
-                    <button id="shopping">Shopping</button>
+            <div class = "bottom">
+                <div class = "selections">
+                    <div id = "filter_neighborhoods">
+                        <p>Select by neighborhoods</p>
+                
+                    </div>
+                    <div class="activities">
+                        <p>Select by activity types</p>
+                        <div class="types">
+                            
+                            <button id="all">All Types</button>
+                            <button id="Food">Food</button>
+                            <button id="Arts">Art</button>
+                            <button id="Nightlife">Night Life</button>
+                            <button id="Active">Active</button>
+                            <button id="Shopping">Shopping</button>
+                        </div>
+                        <div class="food_types">
+                            <p id="dropdown_text" style="visibility:hidden">Select by restaurant cuisine or restaurant types</p>
+                            <div class="cuisine"></div>
+                            <div class="food_type"></div>
+        
+                        </div>
+        
+                    </div>
                 </div>
-                <div class="food_types">
-                    <div class="cuisine"></div>
-                    <div class="food_type"></div>
 
-                </div>
+                <div id='chloropleth'>
+                    <svg id="map" height="500" width="600"></svg>
+    
+                    <script>
+                        const svg = d3.select("#map");
+                        const width_map = svg.attr("width");
+                        const height_map = svg.attr("height");
+                        const margin = {
+                            top: 20,
+                            right: 20,
+                            bottom: 20,
+                            left: 20
+                        };
+                        const mapWidth = width_map - margin.left - margin.right;
+                        const mapHeight = height_map - margin.top - margin.bottom;
+                        const map = svg.append("g")
+                            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+                        
+                        let n_already = false;
+                        let clicked_n = false;
+                        let clicked_food = false;
+                        let clicked_cuisine = false;
+                        let clicked_type = false;
+                        let dropButton_cuisine;
+                    
+    
+    
+                        let dropButton_type;
 
-            </div>
-            <div id='chloropleth'>
-                <svg id="map" height="500" width="600"></svg>
+                                                    
 
-                <script>
-                    const svg = d3.select("#map");
-                    const width_map = svg.attr("width");
-                    const height_map = svg.attr("height");
-                    const margin = {
-                        top: 20,
-                        right: 20,
-                        bottom: 20,
-                        left: 20
-                    };
-                    const mapWidth = width_map - margin.left - margin.right;
-                    const mapHeight = height_map - margin.top - margin.bottom;
-                    const map = svg.append("g")
-                        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-                    let button_already = false;
-                    let clicked_food = false;
-                    let clicked_cuisine = false;
-                    let clicked_type = false;
-                    let dropButton_cuisine;
-
-
-                    let dropButton_type;
-
-                    const request_all_data = async function (sl_type) {
-                        const pitts = await d3.json("pitts.geojson");
-                        console.log(pitts);
-                        // var counties = topojson.feature(pitts, pitts.features);
-                        // console.log(counties);
-                        var statesMesh = topojson.mesh(pitts, pitts.features);
-                        // const neightborhoods_mesh = topojson.mesh(sf,sf.objects.SFNeighborhoods);
-
-                        var projection = d3.geoMercator().fitSize([mapWidth, mapHeight], pitts);
-                        var path = d3.geoPath().projection(projection);
-
-                        let data = await d3.csv("yelp_pittsburgh_new.csv", d3.autoType);
-
-
-                        const request_map = async function (sl_type) {
-                            console.log(clicked_cuisine)
-
-                            let data_ready;
-                            if (sl_type != "all") {
-                                if (clicked_food == true) {
-                                    if (clicked_cuisine == true || clicked_type == true) {
-                                        let temp = data.filter(d => d.type === 'food');
-                                        data_ready = temp.filter(d => d.category === sl_type);
-                                    } else {
-                                        data_ready = data.filter(d => d.type === 'food');
+    
+                        const request_all_data = async function (sl_type) {
+                            const pitts = await d3.json("pitts.geojson");
+                            // var counties = topojson.feature(pitts, pitts.features);
+                            // console.log(counties);
+                            var statesMesh = topojson.mesh(pitts, pitts.features);
+                            // const neightborhoods_mesh = topojson.mesh(sf,sf.objects.SFNeighborhoods);
+    
+                            var projection = d3.geoMercator().fitSize([mapWidth, mapHeight], pitts);
+                            var path = d3.geoPath().projection(projection);
+    
+                            let data = await d3.csv("yelp_pittsburgh_new.csv", d3.autoType);
+                            let n = [];
+                            for (let i = 0 ; i < data.length; i++){
+                                    if (!n.includes(data[i].neighborhood)){
+                                        n.push(data[i].neighborhood);
                                     }
-                                } else {
-                                    data_ready = data.filter(d => d.type === sl_type);
-
-
-                                }
-
-                            } else {
-                                data_ready = data;
-
                             }
-                            console.log(data_ready);
+    
 
-                            // let compExtent = d3.extent(data, d => d.pay);
-                            // let compScale = d3.scaleSequential(d3.interpolateViridis).domain(compExtent);
-                            // let payScale = d3.scaleQuantile()
-                            //     .domain(d3.extent(data, d => d.pay))
-                            //     .range([d3.interpolateViridis(1), d3.interpolateViridis(0.7), d3.interpolateViridis(0.5), d3.interpolateViridis(0.3), d3.interpolateViridis(0.1)]);
+                            const request_map = async function (sl_type) {
+                                console.log(sl_type)
+    
+                                let data_ready;
+                                // console.log(n)
+                                if (sl_type != "all") {
+                                    if (n.includes(sl_type)){
+                                        data_ready = data.filter(d => d.neighborhood === sl_type)
 
-                            map.selectAll("path.neighborhood").data(pitts.features)
-                                .join("path")
-                                .attr("class", "neighborhood")
-                                .attr("d", path)
-                            // .style('fill','white')
-
-                            data.forEach(d => {
-                                d.Position = projection([d.longitude, d.latitude]);
-                            });
-
-                            // let statesPath = map.selectAll("path.state")
-                            //         .data(pitts.features)
-                            //         .join(
-                            //             enter => enter.append("path").attr("d", path)
-                            //             .attr("class", "state")
-                            //             .style("fill", d => payScale(
-                            //                 stateIdCounts[d.id])).call(enter => enter.transition().attr("opacity", 1)),
-                            //             update => update.call(update => update.transition().style("fill", d => payScale(
-                            //                 stateIdCounts[d.id]))),
-                            //             exit => exit.call(exit => exit.transition().attr('opacity', 0).remove())
-                            //         );
-
-
-                            // if (sl_type != "all"){
-                            map.selectAll('image').remove();
-
-                            map.selectAll("image")
-                                .data(data_ready)
-                                .join(
-                                    enter => enter.append('image').attr("xlink:href", d => {
-                                        let tp = d.type;
-                                        return tp + ".png";
-                                    })
-                                        .attr("x", d => d.Position[0])
-                                        .attr("y", d => d.Position[1])
-                                        .attr("width", 20)
-                                        .attr("height", 20)
-                                        .attr('class', 'icons')
-                                        .call(enter => enter.transition().attr("opacity", 1)),
-                                    // update => update.call(update => update.transition().style("opacity", d => {
-                                    //     console.log('update');
-                                    //     return 0;
-                                    // })),
-                                    // exit => exit.call(exit => exit.transition().attr("opacity", 0).remove())
-                                );
-
-                            console.log(d3.selectAll('.icons'))
-
-
-
-                            var zoom = d3.zoom()
-                                .scaleExtent([1, 20])
-                                .translateExtent([
-                                    [-50, -50],
-                                    [mapWidth + 50, mapHeight + 50]
-                                ]) // to lock to edges
-                                .on("zoom", mapZoomed);
-
-                            svg.call(zoom);
-
-                            svg.call(zoom.transform, d3.zoomIdentity); // Executes zoomed() once because we technically have changed the transform
-
-
-                            function mapZoomed({
-                                transform
-                            }) { // Destructuring here directly pulls and assigns the transform
-                                map.attr("transform", transform.toString());
-
-                                map.selectAll("image").
-                                    attr('width', 20 / transform.k).
-                                    attr('height', 20 / transform.k);
-
+                                    }else{
+                                        if (clicked_food == true) {
+                                            if (clicked_cuisine == true || clicked_type == true) {
+                                                let temp = data.filter(d => d.type === 'Food');
+                                                data_ready = temp.filter(d => d.category === sl_type);
+                                            } else {
+                                                data_ready = data.filter(d => d.type === 'Food');
+                                                console.log(111)
+                                            }
+                                        } else {
+                                                data_ready = data.filter(d => d.type === sl_type);
+            
+                                        }
+                                    }
+                                    
+    
+                                } else {
+                                    data_ready = data;
+    
+                                }
+                                console.log(data_ready);
+    
+                                // let compExtent = d3.extent(data, d => d.pay);
+                                // let compScale = d3.scaleSequential(d3.interpolateViridis).domain(compExtent);
+                                // let payScale = d3.scaleQuantile()
+                                //     .domain(d3.extent(data, d => d.pay))
+                                //     .range([d3.interpolateViridis(1), d3.interpolateViridis(0.7), d3.interpolateViridis(0.5), d3.interpolateViridis(0.3), d3.interpolateViridis(0.1)]);
+    
+                                map.selectAll("path.neighborhood").data(pitts.features)
+                                    .join("path")
+                                    .attr("class", "neighborhood")
+                                    .attr("d", path)
+                                // .style('fill','white')
+    
                                 data.forEach(d => {
                                     d.Position = projection([d.longitude, d.latitude]);
                                 });
-
-                                data.filter(l => l.Position != null)
-
+    
+                                // let statesPath = map.selectAll("path.state")
+                                //         .data(pitts.features)
+                                //         .join(
+                                //             enter => enter.append("path").attr("d", path)
+                                //             .attr("class", "state")
+                                //             .style("fill", d => payScale(
+                                //                 stateIdCounts[d.id])).call(enter => enter.transition().attr("opacity", 1)),
+                                //             update => update.call(update => update.transition().style("fill", d => payScale(
+                                //                 stateIdCounts[d.id]))),
+                                //             exit => exit.call(exit => exit.transition().attr('opacity', 0).remove())
+                                //         );
+    
+    
+                                // if (sl_type != "all"){
+                                map.selectAll('image').remove();
+    
+                                map.selectAll("image")
+                                    .data(data_ready)
+                                    .join(
+                                        enter => enter.append('image').attr("xlink:href", d => {
+                                            let tp = d.type;
+                                            return tp + ".png";
+                                        })
+                                            .attr("x", d => d.Position[0])
+                                            .attr("y", d => d.Position[1])
+                                            .attr("width", 20)
+                                            .attr("height", 20)
+                                            .attr('class', 'icons')
+                                            .call(enter => enter.transition().attr("opacity", 1)),
+                                        // update => update.call(update => update.transition().style("opacity", d => {
+                                        //     console.log('update');
+                                        //     return 0;
+                                        // })),
+                                        // exit => exit.call(exit => exit.transition().attr("opacity", 0).remove())
+                                    );
+    
+    
+    
+    
+                                var zoom = d3.zoom()
+                                    .scaleExtent([1, 20])
+                                    .translateExtent([
+                                        [-50, -50],
+                                        [mapWidth + 50, mapHeight + 50]
+                                    ]) // to lock to edges
+                                    .on("zoom", mapZoomed);
+    
+                                svg.call(zoom);
+    
+                                svg.call(zoom.transform, d3.zoomIdentity); // Executes zoomed() once because we technically have changed the transform
+    
+    
+                                function mapZoomed({
+                                    transform
+                                }) { // Destructuring here directly pulls and assigns the transform
+                                    map.attr("transform", transform.toString());
+    
+                                    map.selectAll("image").
+                                        attr('width', 20 / transform.k).
+                                        attr('height', 20 / transform.k);
+    
+                                    data.forEach(d => {
+                                        d.Position = projection([d.longitude, d.latitude]);
+                                    });
+    
+                                    data.filter(l => l.Position != null)
+    
+                                }
+    
+                                d3.selectAll(".icons").on("click", clicked_map);
+    
+                                function clicked_map(event, d) {
+    
+                                    console.log(event);
+    
+                                    requestData_table(event);
+    
+                                }
+    
                             }
-
-                            d3.selectAll(".icons").on("click", clicked_map);
-
-                            function clicked_map(event, d) {
-
-                                console.log(event);
-
-                                requestData_table(event);
-
-                            }
-
-                        }
-                        request_map(sl_type);
-
-                        // map.append("path")
-                        //     .datum(statesMesh)
-                        //     .attr("class", "street_outline")
-                        //     .attr('d',path)
-                        //     .style('stroke','grey')
-                        //     .style('stroke-width',"1px")
-                        //     .style('fill','none')
-
-
-                        function show_food() {
-                            // if (button_already == true){
-                            //     console.log(111);
-                            // }
-                            // clicked_food = true;
-                            // button_already = true;
-                            clicked_food = true;
-                            let all_food_types = [];
-                            data.forEach((item) => {
-                                if (item.type == 'food' && !all_food_types.includes(item.category)) {
-                                    all_food_types.push(item.category);
-                                }
-                            });
-
-                            let cuisines = ['select', 'indpak', 'italian', 'newamerican', 'chinese', 'thai', 'mexican', 'french', 'japanese', 'vietnamese'];
-                            let types_of_food = ['select', 'coffee', 'donuts', 'pizza', 'sandwiches', 'bakeries', 'cafes', 'sushi', 'ethnicmarkets'];
-
-                            function add_cuisine_button() {
-                                dropButton_cuisine = d3.select('.cuisine').append('select');
-                                dropButton_cuisine.selectAll('options_').data(cuisines)
-                                    .enter()
-                                    .append('option')
-                                    .text(function (d) {
-                                        return d
-                                    })
-                                    .attr('value', function (d) {
-                                        return d
-                                    })
-
-                            }
-                            add_cuisine_button();
-
-                            // let dropButton_type;
-                            function add_type_button() {
-                                dropButton_type = d3.select('.food_type').append('select');
-                                dropButton_type.selectAll('options_').data(types_of_food)
-                                    .enter()
-                                    .append('option')
-                                    .text(function (d) {
-                                        return d
-                                    })
-                                    .attr('value', function (d) {
-                                        return d
-                                    })
-
-                            }
-                            add_type_button();
-
-
-                            dropButton_cuisine.on('change', function (d) {
-                                let selected_category = d3.select(this).property("value");
-
-                                if (selected_category == 'select') {
-                                    clicked_cuisine = false;
-                                } else {
-                                    clicked_cuisine = true;
-                                }
-                                if (clicked_cuisine) {
-                                    dropButton_type.remove();
-                                } else {
-                                    add_type_button();
-                                }
-                                request_map(selected_category);
-                            })
-
-
-
-                            dropButton_type.on('change', function (d) {
-
-                                let selected_category = d3.select(this).property("value");
-                                // clicked_food = true;
-                                if (selected_category == 'select') {
-                                    clicked_type = false;
-                                } else {
-                                    clicked_type = true;
-                                    // console.log(111);
-                                }
-                                if (clicked_type) {
-                                    dropButton_cuisine.remove();
-                                } else {
-                                    add_cuisine_button();
-                                }
-                                request_map(selected_category);
-                            })
-
-
-
-                        }
-
-                        if (sl_type == "food" && clicked_food != true) {
-                            show_food();
-                        }
-
-
-
-
-                    }
-
-
-                    // map.selectAll(".icons").on("click", clicked_map);
-
-
-
-
-                    request_all_data("all");
-
-                    function remove_all_buttons() {
-                        if (clicked_food == true) {
-                            console.log(111);
-                            if (clicked_cuisine == true || clicked_cuisine == false) {
-                                dropButton_cuisine.remove();
+                            request_map(sl_type);
+    
+                            // map.append("path")
+                            //     .datum(statesMesh)
+                            //     .attr("class", "street_outline")
+                            //     .attr('d',path)
+                            //     .style('stroke','grey')
+                            //     .style('stroke-width',"1px")
+                            //     .style('fill','none')
+    
+    
+                            function show_food() {
+                                // if (button_already == true){
+                                //     console.log(111);
                                 // }
-                                if (clicked_type == true || clicked_type == false) {
-                                    dropButton_type.remove();
+                                // clicked_food = true;
+                                // button_already = true;
+                                d3.select("#dropdown_text").style("visibility","visible")
+                                clicked_food = true;
+                                let all_food_types = [];
+                                data.forEach((item) => {
+                                    if (item.type == 'food' && !all_food_types.includes(item.category)) {
+                                        all_food_types.push(item.category);
+                                    }
+                                });
+    
+                                let cuisines = ['select', 'Indpak', 'Italian', 'Newamerican', 'Chinese', 'Thai', 'Mexican', 'French', 'Japanese', 'Vietnamese'];
+                                let types_of_food = ['select', 'Coffee', 'Donuts', 'Pizza', 'Sandwiches', 'Bakeries', 'Cafes', 'Sushi', 'Ethnicmarkets'];
+    
+                                function add_cuisine_button() {
+                                    dropButton_cuisine = d3.select('.cuisine').append('select');
+                                    dropButton_cuisine.selectAll('options_').data(cuisines)
+                                        .enter()
+                                        .append('option')
+                                        .text(function (d) {
+                                            return d
+                                        })
+                                        .attr('value', function (d) {
+                                            return d
+                                        })
+    
                                 }
+                                add_cuisine_button();
+    
+                                // let dropButton_type;
+                                function add_type_button() {
+                                    dropButton_type = d3.select('.food_type').append('select');
+                                    dropButton_type.selectAll('options_').data(types_of_food)
+                                        .enter()
+                                        .append('option')
+                                        .text(function (d) {
+                                            return d
+                                        })
+                                        .attr('value', function (d) {
+                                            return d
+                                        })
+    
+                                }
+                                add_type_button();
+    
+    
+                                dropButton_cuisine.on('change', function (d) {
+                                    let selected_category = d3.select(this).property("value");
+    
+                                    if (selected_category == 'select') {
+                                        clicked_cuisine = false;
+                                    } else {
+                                        clicked_cuisine = true;
+                                    }
+                                    if (clicked_cuisine) {
+                                        dropButton_type.remove();
+                                    } else {
+                                        add_type_button();
+                                    }
+                                    request_map(selected_category);
+                                })
+    
+    
+    
+                                dropButton_type.on('change', function (d) {
+    
+                                    let selected_category = d3.select(this).property("value");
+                                    // clicked_food = true;
+                                    if (selected_category == 'select') {
+                                        clicked_type = false;
+                                    } else {
+                                        clicked_type = true;
+                                        // console.log(111);
+                                    }
+                                    if (clicked_type) {
+                                        dropButton_cuisine.remove();
+                                    } else {
+                                        add_cuisine_button();
+                                    }
+                                    request_map(selected_category);
+                                })
+    
+    
+    
                             }
+    
+                            if (sl_type == "Food" && clicked_food != true) {
+                                show_food();
+                            }
+                            
+                            // let n;
+                            
+                            
+                            function show_neigh(){
+                                n_already = true;
+                                // n = [];
+                                // for (let i = 0 ; i < data.length; i++){
+                                //     if (!n.includes(data[i].neighborhood)){
+                                //         n.push(data[i].neighborhood);
+                                //     }
+                                // }
+                                
+                                // console.log(d3.select('div#filter_neighborhoods').append('p'));
+                                for (let i = 0; i < n.length; i++){
+                                    d3.select('div#filter_neighborhoods').append('button').attr('id',n[i])
+                                        .text(n[i])
+                                }
+
+                            }
+                            if (!n_already){
+                                show_neigh();
+                                // neighborhoods = n;
+                            }
+    
+    
+    
                         }
-                        clicked_food = false;
-                    }
-
-                    d3.select("button#all").on("click", function (event) {
-                        let type = event.target.id;
+    
+    
+                        // map.selectAll(".icons").on("click", clicked_map);
+    
+    
+    
+                        // console.log
                         request_all_data("all");
-                        remove_all_buttons();
 
-                    });
-                    d3.select("button#arts").on("click", function (event) {
-                        let type = event.target.id;
-                        request_all_data(type);
-                        remove_all_buttons();
-                    });
-                    d3.select("button#shopping").on("click", function (event) {
-                        let type = event.target.id;
-                        request_all_data(type);
-                        remove_all_buttons();
-                    });
-                    d3.select("button#active").on("click", function (event) {
-                        let type = event.target.id;
-                        request_all_data(type);
-                        remove_all_buttons();
-                    });
-                    d3.select("button#food").on("click", function (event) {
-                        let type = event.target.id;
-                        request_all_data(type);
-                        remove_all_buttons();
-                    });
-                    d3.select("button#nightlife").on("click", function (event) {
-                        let type = event.target.id;
-                        request_all_data(type);
-                        remove_all_buttons();
-                    });
-                </script>
+                        
+    
+                        function remove_all_buttons() {
+                            // if (clicked_food == true) {
+                            //     console.log(111);
+                            //     if (clicked_cuisine == true) {
+                            //         dropButton_type.remove();
+                            //         }
+                            //     if (clicked_type == true) {
+                            //         dropButton_cuisine.remove();
+                            //     }
+                            //     dropButton_type.remove();
+                            // }
+                            dropButton_type.remove();
+                            dropButton_cuisine.remove();
+                            clicked_food = false;
+                            clicked_cuisine = false;
+                            clicked_type = false;
+                            d3.select("#dropdown_text").style("visibility","hidden")
+                        }
+
+                        d3.select("div#filter_neighborhoods").on('click',function(event){
+                            clicked_n = true;
+                            request_all_data(event.target.id);
+                        })
+    
+                        d3.select("button#all").on("click", function (event) {
+                
+                            let type = event.target.id;
+                            request_all_data("all");
+                            remove_all_buttons();
+    
+                        });
+                        d3.select("button#arts").on("click", function (event) {
+                            console.log(event);
+                            let type = event.target.id;
+                            request_all_data(type);
+                            remove_all_buttons();
+                        });
+                        d3.select("button#shopping").on("click", function (event) {
+                            let type = event.target.id;
+                            request_all_data(type);
+                            remove_all_buttons();
+                        });
+                        d3.select("button#active").on("click", function (event) {
+                            let type = event.target.id;
+                            request_all_data(type);
+                            remove_all_buttons();
+                        });
+                        d3.select("button#food").on("click", function (event) {
+                            let type = event.target.id;
+                            request_all_data(type);
+                            if (clicked_food == true){
+                                remove_all_buttons();
+                            }
+                        });
+                        d3.select("button#nightlife").on("click", function (event) {
+                            let type = event.target.id;
+                            request_all_data(type);
+                            remove_all_buttons();
+                        });
+                    </script>
+                </div>
             </div>
-        </div>
+    
+
+            </div>
+            
 
         <div class="right">
 
