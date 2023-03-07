@@ -26,6 +26,12 @@
           stroke: none;
       } */
 
+    h4 {
+        font-size: 40px;
+        font-weight: 200;
+        font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        text-align: center;
+    }
     .state {
         fill: white;
     }
@@ -134,7 +140,7 @@
     }
 
     .right {
-        padding-top: 100px;
+        padding-top: 20px;
     }
 
     .buttons {
@@ -158,6 +164,7 @@
 </style>
 
 <body>
+    <h4>Spending A Day in SF</h4>
     <!---
     <div class="word_cloud">
         <svg id="cloud" height="400" width="500"></svg>
@@ -273,7 +280,7 @@
 
             </div>
             <div id='chloropleth'>
-                <svg id="map" height="700" width="700"></svg>
+                <svg id="map" height="500" width="600"></svg>
 
                 <script>
                     const svg = d3.select("#map");
