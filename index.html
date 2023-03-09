@@ -469,10 +469,25 @@
                                             transform
                                         }) { // Destructuring here directly pulls and assigns the transform
                                             map.attr("transform", transform.toString());
+
+                                            function mouseOver_zoomed(event){
+                                            d3.select(this)
+                                                .attr("height", 20 / transform.k + 10)
+                                                .attr("width", 20 / transform.k + 10)
+                                            }
+        
+                                        function mouseOut_zoomed(event){
+                                            console.log(event);
+                                            d3.select(this)
+                                                .attr("height", 20 / transform.k)
+                                                .attr("width", 20 / transform.k)
+                                        }
             
                                             map.selectAll("image").
                                                 attr('width', 20 / transform.k).
-                                                attr('height', 20 / transform.k);
+                                                attr('height', 20 / transform.k)
+                                                .on("mouseover",mouseOver_zoomed)
+                                                .on('mouseout',mouseOut_zoomed);
             
                                             data.forEach(d => {
                                                 d.Position = projection([d.longitude, d.latitude]);
